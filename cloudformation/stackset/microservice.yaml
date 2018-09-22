@@ -26,45 +26,6 @@ Parameters:
     Type: String
     Description: Id of security group to access load balancer
 
-  DatabaseEndpoint:
-    Type: String
-    Description: Endpoint for rds postgresql database
-
-  DatabasePort:
-     Type: String
-     Description: Port for rds postgresql database
-
-  DBMasterUserName:
-    Type: String
-    Default: matusko
-    Description: Master name for rds postgresql database
-
-  DBMasterPassword:
-    Type: String
-    Description: Password for rds postgresql database master
-    NoEcho: true
-
-  GitHubUser:
-    Type: String
-    Default: Matusko
-    Description: Your username on GitHub.
-
-  GitHubRepo:
-    Type: String
-    Default: ecs-spring-boot
-    Description: The repo name of the sample service.
-
-  GitHubBranch:
-    Type: String
-    Default: master
-    Description: The branch of the repo to continuously deploy.
-
-  GitHubToken:
-    Type: String
-    NoEcho: true
-    Description: >
-      Token for the user specified above. (https://github.com/settings/tokens)
-
   TemplateBucket:
     Type: String
     Default: ec2-spring-boot-cloudformation-stack
@@ -80,10 +41,6 @@ Parameters:
     Type: String
     Description: SSl certificate arn for load balancer listene
 
-  MicroserviceArtifactStoreS3Location:
-    Type: String
-    Description: Name of the S3 bucket to store microservice docker CodePipeline artificat.
-
 Resources:
   Cluster:
     Type: AWS::CloudFormation::Stack
@@ -93,24 +50,6 @@ Resources:
         SourceSecurityGroup: !Ref LoadBalancerSourceSecurityGroup
         Subnets: !Ref Subnets
         VpcId: !Ref VpcId
-
-  DeploymentPipeline:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/deployment-pipeline.yaml"
-      Parameters:
-        Cluster: !GetAtt Cluster.Outputs.ClusterName
-        Service: !GetAtt Service.Outputs.Service
-        GitHubUser: !Ref GitHubUser
-        GitHubToken: !Ref GitHubToken
-        GitHubRepo: !Ref GitHubRepo
-        GitHubBranch: !Ref GitHubBranch
-        DatabaseEndpoint: !Ref DatabaseEndpoint
-        DatabasePort: !Ref DatabasePort
-        DBMasterUserName: !Ref DBMasterUserName
-        DBMasterPassword: !Ref DBMasterPassword
-        ContextPath: !Ref ContextPath
-        MicroserviceArtifactStoreS3Location: !Ref MicroserviceArtifactStoreS3Location
 
   LoadBalancerListener:
     Type: AWS::CloudFormation::Stack
@@ -134,6 +73,9 @@ Resources:
 
 
 Outputs:
-  PipelineUrl:
-    Description: The continuous deployment pipeline in the AWS Management Console.
-    Value: !GetAtt DeploymentPipeline.Outputs.PipelineUrl
+  Cluster:
+    Description: Cluster
+    Value: !GetAtt Cluster.Outputs.ClusterName
+  Service:
+    Description: Service
+    Value: !GetAtt Service.Outputs.Service

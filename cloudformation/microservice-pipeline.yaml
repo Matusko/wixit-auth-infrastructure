@@ -4,27 +4,15 @@ Parameters:
   ArtifactStoreS3Location:
     Type: String
     Description: Name of the S3 bucket to store clodformation CodePipeline artificat.
-  MicroserviceArtifactStoreS3Location:
-    Type: String
-    Description: Name of the S3 bucket to store microservice docker CodePipeline artificat.
   GitHubInfrastructureRepo:
     Type: String
   GitHubInfrastructureBranch:
-    Type: String
-  GitHubMcroserviceRepo:
-    Type: String
-  GitHubMcroserviceBranch:
     Type: String
   GitHubToken:
     Type: String
     NoEcho: true
   GitHubUser:
     Type: String
-  DBMasterUserName:
-    Type: String
-  DBMasterPassword:
-    Type: String
-    NoEcho: true
   EnvironmentStackName:
     Type: String
   ContextPath:
@@ -435,32 +423,11 @@ Resources:
           - Name: TEMPLATE_BUCKET
             Value:
               Ref: ArtifactStoreS3Location
-          - Name: MICROSERVICE_ARTIFACT_TEMPLATE_BUCKET
-            Value:
-              Ref: MicroserviceArtifactStoreS3Location
           - Name: TEMPLATE_PREFIX
             Value: codebuild
           - Name: ENVIRONMENT_STACK_NAME
             Value:
               Ref: EnvironmentStackName
-          - Name: DB_MASTER_USER_NAME
-            Value:
-              Ref: DBMasterUserName
-          - Name: DB_MASTER_PASSWORD
-            Value:
-              Ref: DBMasterPassword
-          - Name: GITHUB_USER
-            Value:
-              Ref: GitHubUser
-          - Name: GITHUB_REPO
-            Value:
-              Ref: GitHubMcroserviceRepo
-          - Name: GITHUB_BRANCH
-            Value:
-              Ref: GitHubMcroserviceBranch
-          - Name: GITHUB_TOKEN
-            Value:
-              Ref: GitHubToken
           - Name: CONTEXT_PATH
             Value:
               Ref: ContextPath
@@ -474,13 +441,11 @@ Resources:
           environment_variables:
             plaintext:
               CHILD_TEMPLATES: |
-                cloudformation/stackset/microservice-templates/deployment-pipeline.yaml
                 cloudformation/stackset/microservice-templates/ecs-cluster.yaml
                 cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
                 cloudformation/stackset/microservice-templates/service.yaml
               TEMPLATE_FILES: |
                 cloudformation/stackset/microservice.yaml
-                cloudformation/stackset/microservice-templates/deployment-pipeline.yaml
                 cloudformation/stackset/microservice-templates/ecs-cluster.yaml
                 cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
                 cloudformation/stackset/microservice-templates/service.yaml
@@ -525,15 +490,8 @@ Resources:
                     CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
                     LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED=$(echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN | sed 's/\//\\\//g')
 
-                    sed -i -e "s/DB_MASTER_USER_NAME_PLACEHOLDER/$DB_MASTER_USER_NAME/" $conf
-                    sed -i -e "s/DB_MASTER_PASSWORD_PLACEHOLDER/$DB_MASTER_PASSWORD/" $conf
-                    sed -i -e "s/GITHUB_USER_PLACEHOLDER/$GITHUB_USER/" $conf
-                    sed -i -e "s/GITHUB_REPO_PLACEHOLDER/$GITHUB_REPO/" $conf
-                    sed -i -e "s/GITHUB_BRANCH_PLACEHOLDER/$GITHUB_BRANCH/" $conf
-                    sed -i -e "s/GITHUB_TOKEN_PLACEHOLDER/$GITHUB_TOKEN/" $conf
                     sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" $conf
                     sed -i -e "s/LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER/$LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED/" $conf
-                    sed -i -e "s/MICROSERVICE_ARTIFACT_TEMPLATE_BUCKET_PLACEHOLDER/$MICROSERVICE_ARTIFACT_TEMPLATE_BUCKET/" $conf
                     if [ "X$TEMPLATE_PREFIX" = "X" ]; then
                       echo "Replacing \"TEMPLATE_PLACEHOLDER\" for \"$TEMPLATE_BUCKET\" in $conf"
                       sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET/" $conf
