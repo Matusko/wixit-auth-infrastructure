@@ -42,8 +42,8 @@ phases:
 
     - |
       aws s3 cp "cloudformation/stackset/microservice.yaml" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice.yaml"
-      aws s3 cp "microservice-params-prod.json" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice-params-prod.json"
+      aws s3 cp "cloudformation/stackset/microservice-params-prod.json" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice-params-prod.json"
 artifacts:
   files:
   - cloudformation/stackset/microservice.yaml
-  - microservice-params-prod.json
+  - cloudformation/stackset/microservice-params-prod.json

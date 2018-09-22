@@ -509,7 +509,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName:
                   Fn::Sub: Prod-${AWS::StackName}
-                TemplateConfiguration: CFNTemplateArtifact::microservice-params-prod.json
+                TemplateConfiguration: CFNTemplateArtifact::cloudformation/stackset/microservice-params-prod.json
                 TemplatePath: CFNTemplateArtifact::cloudformation/stackset/microservice.yaml
               RunOrder: 1
             -
