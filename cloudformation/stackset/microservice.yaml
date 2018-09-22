@@ -35,17 +35,27 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/ecs-cluster.yaml"
       Parameters:
-        SourceSecurityGroup: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
-        Subnets: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
-        VpcId: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+        SourceSecurityGroup:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+        Subnets:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+        VpcId:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
 
   LoadBalancerListener:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener.yaml"
       Parameters:
-        VpcId: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
-        LoadBalancerArn: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerArn"
+        VpcId:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+        LoadBalancerArn:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerArn"
         LoadBalancerListenerCertificateArn: !Ref LoadBalancerListenerCertificateArn
         ContextPath: !Ref ContextPath
 
@@ -56,8 +66,12 @@ Resources:
       Parameters:
         Cluster: !GetAtt Cluster.Outputs.ClusterName
         TargetGroup: !GetAtt LoadBalancerListener.Outputs.TargetGroup
-        SourceSecurityGroup: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
-        Subnets: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+        SourceSecurityGroup:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+        Subnets:
+          Fn::ImportValue:
+            !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
 
 
 Outputs:
