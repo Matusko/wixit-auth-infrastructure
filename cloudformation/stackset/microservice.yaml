@@ -35,23 +35,17 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/ecs-cluster.yaml"
       Parameters:
-        SourceSecurityGroup:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
-        Subnets:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
-        VpcId:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
-
+        SourceSecurityGroup: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+        Subnets: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+        VpcId: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
 
   LoadBalancerListener:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener.yaml"
       Parameters:
-        VpcId:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
-        LoadBalancerArn:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerArn"
+        VpcId: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+        LoadBalancerArn: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerArn"
         LoadBalancerListenerCertificateArn: !Ref LoadBalancerListenerCertificateArn
         ContextPath: !Ref ContextPath
 
@@ -62,10 +56,8 @@ Resources:
       Parameters:
         Cluster: !GetAtt Cluster.Outputs.ClusterName
         TargetGroup: !GetAtt LoadBalancerListener.Outputs.TargetGroup
-        SourceSecurityGroup:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
-        Subnets:
-          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+        SourceSecurityGroup: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+        Subnets: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
 
 
 Outputs:
