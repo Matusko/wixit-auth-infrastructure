@@ -1,0 +1,139 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: >
+  This template shows how to use AWS CodePipeline and AWS CodeBuild to build an
+  automated continuous deployment pipeline to Amazon Elastic Container Service
+  (Amazon ECS) using clusters powered by AWS Fargate or Amazon Elastic Compute
+  Cloud (Amazon EC2).
+
+
+Parameters:
+  VpcId:
+    Type: String
+    Description: Vpc Id
+
+  Subnets:
+    Type: String
+    Description: List of subnets ids
+
+  LoadBalancerArn:
+    Type: String
+    Description: Arn of load balancer
+
+  LoadBalancerSourceSecurityGroup:
+    Type: String
+    Description: Id of security group to access load balancer
+
+  DatabaseEndpoint:
+    Type: String
+    Description: Endpoint for rds postgresql database
+
+  DatabasePort:
+     Type: String
+     Description: Port for rds postgresql database
+
+  DBMasterUserName:
+    Type: String
+    Default: matusko
+    Description: Master name for rds postgresql database
+
+  DBMasterPassword:
+    Type: String
+    Description: Password for rds postgresql database master
+    NoEcho: true
+
+  GitHubUser:
+    Type: String
+    Default: Matusko
+    Description: Your username on GitHub.
+
+  GitHubRepo:
+    Type: String
+    Default: ecs-spring-boot
+    Description: The repo name of the sample service.
+
+  GitHubBranch:
+    Type: String
+    Default: master
+    Description: The branch of the repo to continuously deploy.
+
+  GitHubToken:
+    Type: String
+    NoEcho: true
+    Description: >
+      Token for the user specified above. (https://github.com/settings/tokens)
+
+  TemplateBucket:
+    Type: String
+    Default: ec2-spring-boot-cloudformation-stack
+    Description: >
+      The S3 bucket from which to fetch the templates used by this stack.
+
+  ContextPath:
+    Type: String
+    Default: /auth
+    Description: url path prefix for all microservice calls
+
+  LoadBalancerListenerCertificateArn:
+    Type: String
+    Description: SSl certificate arn for load balancer listene
+
+  MicroserviceArtifactStoreS3Location:
+    Type: String
+    Description: Name of the S3 bucket to store microservice docker CodePipeline artificat.
+
+Resources:
+  Cluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/ecs-cluster.yaml"
+      Parameters:
+        SourceSecurityGroup: !Ref LoadBalancerSourceSecurityGroup
+        Subnets: !Ref Subnets
+        VpcId: !Ref VpcId
+
+  DeploymentPipeline:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/deployment-pipeline.yaml"
+      Parameters:
+        Cluster: !GetAtt Cluster.Outputs.ClusterName
+        Service: !GetAtt Service.Outputs.Service
+        GitHubUser: !Ref GitHubUser
+        GitHubToken: !Ref GitHubToken
+        GitHubRepo: !Ref GitHubRepo
+        GitHubBranch: !Ref GitHubBranch
+        DatabaseEndpoint: !Ref DatabaseEndpoint
+        DatabasePort: !Ref DatabasePort
+        DBMasterUserName: !Ref DBMasterUserName
+        DBMasterPassword: !Ref DBMasterPassword
+        ContextPath: !Ref ContextPath
+        MicroserviceArtifactStoreS3Location: !Ref MicroserviceArtifactStoreS3Location
+
+  LoadBalancerListener:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener.yaml"
+      Parameters:
+        VpcId: !Ref VpcId
+        LoadBalancerArn: !Ref LoadBalancerArn
+        LoadBalancerListenerCertificateArn: !Ref LoadBalancerListenerCertificateArn
+        ContextPath: !Ref ContextPath
+
+  Service:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/service.yaml"
+      Parameters:
+        Cluster: !GetAtt Cluster.Outputs.ClusterName
+        TargetGroup: !GetAtt LoadBalancerListener.Outputs.TargetGroup
+        SourceSecurityGroup: !Ref LoadBalancerSourceSecurityGroup
+        Subnets: !Ref Subnets
+
+
+Outputs:
+  PipelineUrl:
+    Description: The continuous deployment pipeline in the AWS Management Console.
+    Value: !GetAtt DeploymentPipeline.Outputs.PipelineUrl

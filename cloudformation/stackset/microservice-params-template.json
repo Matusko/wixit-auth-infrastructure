@@ -1,0 +1,14 @@
+{
+  "Parameters" : {
+    "DBMasterUserName": "DB_MASTER_USER_NAME_PLACEHOLDER",
+    "DBMasterPassword": "DB_MASTER_PASSWORD_PLACEHOLDER",
+    "GitHubUser": "GITHUB_USER_PLACEHOLDER",
+    "GitHubRepo": "GITHUB_REPO_PLACEHOLDER",
+    "GitHubBranch": "GITHUB_BRANCH_PLACEHOLDER",
+    "GitHubToken": "GITHUB_TOKEN_PLACEHOLDER",
+    "TemplateBucket": "TEMPLATE_PLACEHOLDER",
+    "ContextPath": "CONTEXT_PATH_PLACEHOLDER",
+    "LoadBalancerListenerCertificateArn": "LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER",
+    "MicroserviceArtifactStoreS3Location": "MICROSERVICE_ARTIFACT_TEMPLATE_BUCKET_PLACEHOLDER"
+  }
+}
