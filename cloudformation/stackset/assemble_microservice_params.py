@@ -14,7 +14,7 @@ environment_stack_set_outputs = environment_stack_set_desc['Stacks'][0]['Outputs
 
 microsevice_input_params = environment_params
 
-exclude_params = ['ServiceUrl']
+exclude_params = ['ServiceUrl', 'DatabaseEndpoint', 'DatabasePort']
 
 for output in environment_stack_set_outputs:
     if output['OutputKey'] not in exclude_params:
