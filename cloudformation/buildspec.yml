@@ -1,0 +1,49 @@
+version: 0.1
+environment_variables:
+  plaintext:
+    CHILD_TEMPLATES: |
+      cloudformation/stackset/microservice-templates/ecs-cluster.yaml
+      cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
+      cloudformation/stackset/microservice-templates/service.yaml
+    TEMPLATE_FILES: |
+      cloudformation/stackset/microservice.yaml
+      cloudformation/stackset/microservice-templates/ecs-cluster.yaml
+      cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
+      cloudformation/stackset/microservice-templates/service.yaml
+phases:
+  install:
+    commands:
+      npm install jsonlint -g
+  pre_build:
+    commands:
+    - echo "Validating CFN templates"
+    - |
+      for cfn_template in $TEMPLATE_FILES; do
+        echo "Validating CloudFormation template file $cfn_template"
+        aws cloudformation validate-template --template-body file://$cfn_template
+      done
+  build:
+    commands:
+    - echo "Copying child stack templates to S3"
+    - |
+      for child_template in $CHILD_TEMPLATES; do
+        aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/codebuild/$child_template"
+      done
+
+    - CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
+    - LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED=$(echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN | sed 's/\//\\\//g')
+
+    - sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
+    - sed -i -e "s/LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER/$LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED/" cloudformation/stackset/microservice-params-template.json
+    - sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
+
+    - cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-prod.json
+    - sed -i -e "s/ENVIRONMENT_PLACEHOLDER/Prod\/codebuild/" cloudformation/stackset/microservice-params-prod.json
+
+    - |
+      aws s3 cp "cloudformation/stackset/microservice.yaml" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice.yaml"
+      aws s3 cp "microservice-params-prod.json" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice-params-prod.json"
+artifacts:
+  files:
+  - cloudformation/stackset/microservice.yaml
+  - microservice-params-prod.json

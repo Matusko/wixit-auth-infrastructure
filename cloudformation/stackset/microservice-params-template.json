@@ -2,6 +2,7 @@
   "Parameters" : {
     "TemplateBucket": "TEMPLATE_PLACEHOLDER",
     "ContextPath": "CONTEXT_PATH_PLACEHOLDER",
-    "LoadBalancerListenerCertificateArn": "LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER"
+    "LoadBalancerListenerCertificateArn": "LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER",
+    "Environment": "ENVIRONMENT_PLACEHOLDER"
   }
 }

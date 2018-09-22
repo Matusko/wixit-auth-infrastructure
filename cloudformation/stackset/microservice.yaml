@@ -10,21 +10,9 @@ Description: >
 
 
 Parameters:
-  VpcId:
+  Environment:
     Type: String
-    Description: Vpc Id
-
-  Subnets:
-    Type: String
-    Description: List of subnets ids
-
-  LoadBalancerArn:
-    Type: String
-    Description: Arn of load balancer
-
-  LoadBalancerSourceSecurityGroup:
-    Type: String
-    Description: Id of security group to access load balancer
+    Description: Prod or Uat or Dev
 
   TemplateBucket:
     Type: String
@@ -47,17 +35,23 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/ecs-cluster.yaml"
       Parameters:
-        SourceSecurityGroup: !Ref LoadBalancerSourceSecurityGroup
-        Subnets: !Ref Subnets
-        VpcId: !Ref VpcId
+        SourceSecurityGroup:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+        Subnets:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+        VpcId:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+
 
   LoadBalancerListener:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener.yaml"
       Parameters:
-        VpcId: !Ref VpcId
-        LoadBalancerArn: !Ref LoadBalancerArn
+        VpcId:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+        LoadBalancerArn:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerArn"
         LoadBalancerListenerCertificateArn: !Ref LoadBalancerListenerCertificateArn
         ContextPath: !Ref ContextPath
 
@@ -68,8 +62,10 @@ Resources:
       Parameters:
         Cluster: !GetAtt Cluster.Outputs.ClusterName
         TargetGroup: !GetAtt LoadBalancerListener.Outputs.TargetGroup
-        SourceSecurityGroup: !Ref LoadBalancerSourceSecurityGroup
-        Subnets: !Ref Subnets
+        SourceSecurityGroup:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+        Subnets:
+          Ref: !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
 
 
 Outputs:

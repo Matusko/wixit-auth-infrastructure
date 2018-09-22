@@ -13,8 +13,6 @@ Parameters:
     NoEcho: true
   GitHubUser:
     Type: String
-  EnvironmentStackName:
-    Type: String
   ContextPath:
     Type: String
   LoadBalancerListenerCertificateArn:
@@ -372,7 +370,6 @@ Resources:
                   - "cloudformation:List*"
                 Resource:
                   - Fn::Sub: arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/Test-${AWS::StackName}*
-                  - Fn::Sub: arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${EnvironmentStackName}*
               -
                 Effect: "Allow"
                 Action:
@@ -425,9 +422,6 @@ Resources:
               Ref: ArtifactStoreS3Location
           - Name: TEMPLATE_PREFIX
             Value: codebuild
-          - Name: ENVIRONMENT_STACK_NAME
-            Value:
-              Ref: EnvironmentStackName
           - Name: CONTEXT_PATH
             Value:
               Ref: ContextPath
@@ -436,86 +430,7 @@ Resources:
               Ref: LoadBalancerListenerCertificateArn
       Source:
         Type: CODEPIPELINE
-        BuildSpec: |
-          version: 0.1
-          environment_variables:
-            plaintext:
-              CHILD_TEMPLATES: |
-                cloudformation/stackset/microservice-templates/ecs-cluster.yaml
-                cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
-                cloudformation/stackset/microservice-templates/service.yaml
-              TEMPLATE_FILES: |
-                cloudformation/stackset/microservice.yaml
-                cloudformation/stackset/microservice-templates/ecs-cluster.yaml
-                cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
-                cloudformation/stackset/microservice-templates/service.yaml
-              CONFIG_FILES: |
-                cloudformation/stackset/microservice-params-template.json
-          phases:
-            install:
-              commands:
-                npm install jsonlint -g
-            pre_build:
-              commands:
-                - ls -la
-                - echo "Validating CFN templates"
-                - |
-                  for cfn_template in $TEMPLATE_FILES; do
-                    echo "Validating CloudFormation template file $cfn_template"
-                    aws cloudformation validate-template --template-body file://$cfn_template
-                  done
-                - |
-                  for conf in $CONFIG_FILES; do
-                    echo "Validating CFN parameters config file $conf"
-                    jsonlint -q $conf
-                  done
-            build:
-              commands:
-                - echo "Copying child stack templates to S3"
-                - |
-                  for child_template in $CHILD_TEMPLATES; do
-                    if [ "X$TEMPLATE_PREFIX" = "X" ]; then
-                      aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/$child_template"
-                    else
-                      aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/$TEMPLATE_PREFIX/$child_template"
-                    fi
-                  done
-                - echo "Updating template configurtion files to use the appropriate values"
-                - |
-                  for conf in $CONFIG_FILES; do
-                    echo "Replacing placeholders in $conf"
-                    echo "Replacing LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER with $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN"
-                    echo "Replacing CONTEXT_PATH_PLACEHOLDER with $CONTEXT_PATH"
-
-                    CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
-                    LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED=$(echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN | sed 's/\//\\\//g')
-
-                    sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" $conf
-                    sed -i -e "s/LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER/$LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED/" $conf
-                    if [ "X$TEMPLATE_PREFIX" = "X" ]; then
-                      echo "Replacing \"TEMPLATE_PLACEHOLDER\" for \"$TEMPLATE_BUCKET\" in $conf"
-                      sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET/" $conf
-                    else
-                      echo "Replacing \"TEMPLATE_PLACEHOLDER\" for \"$TEMPLATE_BUCKET/$TEMPLATE_PREFIX\" in $conf"
-                      sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET\/$TEMPLATE_PREFIX/" $conf
-                    fi
-                  done
-                - |
-                  chmod +x cloudformation/stackset/assemble-microservice-params.sh
-                  ./cloudformation/stackset/assemble-microservice-params.sh $ENVIRONMENT_STACK_NAME
-                - |
-                  if [ "X$TEMPLATE_PREFIX" = "X" ]; then
-                    aws s3 cp "cloudformation/stackset/microservice.yaml" "s3://$TEMPLATE_BUCKET/stackset/microservice.yaml"
-                    aws s3 cp "microservice-params.json" "s3://$TEMPLATE_BUCKET/stackset/microservice-params.json"
-                  else
-                    aws s3 cp "cloudformation/stackset/microservice.yaml" "s3://$TEMPLATE_BUCKET/$TEMPLATE_PREFIX/stackset/microservice.yaml"
-                    aws s3 cp "microservice-params.json" "s3://$TEMPLATE_BUCKET/$TEMPLATE_PREFIX/stackset/microservice-params.json"
-                  fi
-          artifacts:
-            files:
-              - cloudformation/stackset/microservice.yaml
-              - microservice-params.json
-
+        BuildSpec: cloudformation/buildspec.yml
       TimeoutInMinutes: 15
 
   ArtifactBucket:
@@ -594,7 +509,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName:
                   Fn::Sub: Prod-${AWS::StackName}
-                TemplateConfiguration: CFNTemplateArtifact::microservice-params.json
+                TemplateConfiguration: CFNTemplateArtifact::microservice-params-prod.json
                 TemplatePath: CFNTemplateArtifact::cloudformation/stackset/microservice.yaml
               RunOrder: 1
             -
