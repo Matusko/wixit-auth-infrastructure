@@ -19,6 +19,9 @@ Parameters:
     Type: String
   EnvironmentStackSetName:
     Type: String
+  ConfigLocation:
+    Type: String
+    Default: wixit-core-configs
 
 Resources:
   CodePipelineRole:
@@ -55,6 +58,8 @@ Resources:
                 Resource:
                   - Fn::Sub: arn:aws:s3:::${ArtifactStoreS3Location}
                   - Fn::Sub: arn:aws:s3:::${ArtifactStoreS3Location}/*
+                  - Fn::Sub: arn:aws:s3:::${ConfigLocation}
+                  - Fn::Sub: arn:aws:s3:::${ConfigLocation}/*
               -
                 Effect: "Allow"
                 Action:
@@ -342,6 +347,8 @@ Resources:
                 Resource:
                   - Fn::Sub: arn:aws:s3:::${ArtifactStoreS3Location}
                   - Fn::Sub: arn:aws:s3:::${ArtifactStoreS3Location}/*
+                  - Fn::Sub: arn:aws:s3:::${ConfigLocation}
+                  - Fn::Sub: arn:aws:s3:::${ConfigLocation}/*
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -405,6 +412,8 @@ Resources:
                   - Fn::Sub: arn:aws:s3:::codepipeline-${AWS::Region}-*
                   - Fn::Sub: arn:aws:s3:::${ArtifactStoreS3Location}/*
                   - Fn::Sub: arn:aws:s3:::${ArtifactStoreS3Location}
+                  - Fn::Sub: arn:aws:s3:::${ConfigLocation}/*
+                  - Fn::Sub: arn:aws:s3:::${ConfigLocation}
   BuildCopyCFNProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -422,6 +431,9 @@ Resources:
           - Name: TEMPLATE_BUCKET
             Value:
               Ref: ArtifactStoreS3Location
+          - Name: CONFIG_BUCKET
+            Value:
+              Ref: ConfigLocation
           - Name: TEMPLATE_PREFIX
             Value: codebuild
           - Name: CONTEXT_PATH
