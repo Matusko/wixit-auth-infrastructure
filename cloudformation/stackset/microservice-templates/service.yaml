@@ -25,7 +25,7 @@ Parameters:
   DatabasePort:
     Type: String
 
-  BMasterUserName:
+  DBMasterUserName:
     Type: String
 
   DBMasterPassword:
