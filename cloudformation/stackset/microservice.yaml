@@ -29,6 +29,7 @@ Parameters:
 
   DBMasterPassword:
     Type: String
+    NoEcho: true
 
 Resources:
   Cluster:
