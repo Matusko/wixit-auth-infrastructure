@@ -42,7 +42,9 @@ phases:
       cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-prod.json
       aws s3 cp s3://$CONFIG_BUCKET/auth/prod/config.json .
       values=$(<config.json)
+      echo $values
       for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
+        echo $s
         export $s
       done
       sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
