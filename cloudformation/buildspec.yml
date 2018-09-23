@@ -42,6 +42,9 @@ phases:
       aws s3 cp s3://wixit-core-configs/auth/prod/set-vars.sh .
       chmod +x set-vars.sh
       ./set-vars.sh
+      echo "SET UP VARS"
+      echo $DATABASE_MASTER_USERNAME
+      echo $DATABASE_MASTER_PASSWORD
       sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
       sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD/" cloudformation/stackset/microservice-params-prod.json
       sed -i -e "s/ENVIRONMENT_PLACEHOLDER/PROD/" cloudformation/stackset/microservice-params-prod.json
