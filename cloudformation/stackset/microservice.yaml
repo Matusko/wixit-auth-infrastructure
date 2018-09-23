@@ -1,14 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 
-
-Description: >
-  This template shows how to use AWS CodePipeline and AWS CodeBuild to build an
-  automated continuous deployment pipeline to Amazon Elastic Container Service
-  (Amazon ECS) using clusters powered by AWS Fargate or Amazon Elastic Compute
-  Cloud (Amazon EC2).
-
-
 Parameters:
   Environment:
     Type: String
