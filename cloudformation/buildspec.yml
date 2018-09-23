@@ -43,7 +43,7 @@ phases:
       aws s3 cp s3://$CONFIG_BUCKET/auth/prod/config.json .
       echo "WTF"
       cat config.json
-      values=$(<config.json)
+      values=`cat config.json`
       echo $values
       for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
         echo $s
