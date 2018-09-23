@@ -14,6 +14,9 @@ Parameters:
     Type: String
     Description: Prod or Uat or Dev
 
+  EnvironmentStackSetName:
+    Type: String
+
   TemplateBucket:
     Type: String
     Default: ec2-spring-boot-cloudformation-stack
@@ -37,13 +40,13 @@ Resources:
       Parameters:
         SourceSecurityGroup:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+            !Sub "${EnvironmentStackSetName}-${Environment}-LoadBalancerSourceSecurityGroup"
         Subnets:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+            !Sub "${EnvironmentStackSetName}-${Environment}-Subnets"
         VpcId:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+            !Sub "${EnvironmentStackSetName}-${Environment}-VpcId"
 
   LoadBalancerListener:
     Type: AWS::CloudFormation::Stack
@@ -52,10 +55,10 @@ Resources:
       Parameters:
         VpcId:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-VpcId"
+            !Sub "${EnvironmentStackSetName}-${Environment}-VpcId"
         LoadBalancerArn:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerArn"
+            !Sub "${EnvironmentStackSetName}-${Environment}-LoadBalancerArn"
         LoadBalancerListenerCertificateArn: !Ref LoadBalancerListenerCertificateArn
         ContextPath: !Ref ContextPath
 
@@ -68,10 +71,10 @@ Resources:
         TargetGroup: !GetAtt LoadBalancerListener.Outputs.TargetGroup
         SourceSecurityGroup:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-LoadBalancerSourceSecurityGroup"
+            !Sub "${EnvironmentStackSetName}-${Environment}-LoadBalancerSourceSecurityGroup"
         Subnets:
           Fn::ImportValue:
-            !Sub "${Environment}-wixit-test-environment-pipeline-Subnets"
+            !Sub "${EnvironmentStackSetName}-${Environment}-Subnets"
 
 
 Outputs:
