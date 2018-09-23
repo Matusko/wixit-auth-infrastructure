@@ -13,8 +13,8 @@ environment_variables:
 phases:
   install:
     commands:
-      apt update && apt install -y jq
-      npm install jsonlint -g
+    - apt update && apt install -y jq
+    - npm install jsonlint -g
   pre_build:
     commands:
     - echo "Validating CFN templates"
