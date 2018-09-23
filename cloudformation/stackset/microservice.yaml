@@ -81,6 +81,10 @@ Outputs:
   Cluster:
     Description: Cluster
     Value: !GetAtt Cluster.Outputs.ClusterName
+    Export:
+      Name: !Sub "${AWS::StackName}-Cluster"
   Service:
     Description: Service
     Value: !GetAtt Service.Outputs.Service
+    Export:
+      Name: !Sub "${AWS::StackName}-Service"
