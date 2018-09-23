@@ -81,6 +81,7 @@ Resources:
             !Sub "${EnvironmentStackSetName}-${Environment}-DatabasePort"
         DBMasterUserName: !Ref DBMasterUserName
         DBMasterPassword: !Ref DBMasterPassword
+        ContextPath: !Ref ContextPath
 
 
 Outputs:
