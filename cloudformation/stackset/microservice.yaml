@@ -24,12 +24,6 @@ Parameters:
     Type: String
     Description: SSl certificate arn for load balancer listene
 
-  DatabaseEndpoint:
-    Type: String
-
-  DatabasePort:
-    Type: String
-
   DBMasterUserName:
     Type: String
 
