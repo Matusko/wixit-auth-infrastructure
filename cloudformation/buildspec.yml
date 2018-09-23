@@ -31,15 +31,19 @@ phases:
       done
     - |
       CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
-      echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN
       LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED=$(echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN | sed 's/\//\\\//g')
-      echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED
       sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER/$LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/ENVIRONMENT_STACK_SET_NAME_PLACEHOLDER/$ENVIRONMENT_STACK_SET_NAME/" cloudformation/stackset/microservice-params-template.json
-      cat cloudformation/stackset/microservice-params-template.json
+
+      echo "PROD CONFIGS"
       cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-prod.json
+      aws s3 cp s3://wixit-core-configs/auth/prod/set-vars.sh .
+      chmod +x set-vars.sh
+      ./set-vars.sh
+      sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
+      sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD/" cloudformation/stackset/microservice-params-prod.json
       sed -i -e "s/ENVIRONMENT_PLACEHOLDER/PROD/" cloudformation/stackset/microservice-params-prod.json
 
     - |

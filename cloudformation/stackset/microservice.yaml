@@ -24,6 +24,18 @@ Parameters:
     Type: String
     Description: SSl certificate arn for load balancer listene
 
+  DatabaseEndpoint:
+    Type: String
+
+  DatabasePort:
+    Type: String
+
+  DBMasterUserName:
+    Type: String
+
+  DBMasterPassword:
+    Type: String
+
 Resources:
   Cluster:
     Type: AWS::CloudFormation::Stack
@@ -67,6 +79,14 @@ Resources:
         Subnets:
           Fn::ImportValue:
             !Sub "${EnvironmentStackSetName}-${Environment}-Subnets"
+        DatabaseEndpoint:
+          Fn::ImportValue:
+            !Sub "${EnvironmentStackSetName}-${Environment}-DatabaseEndpoint"
+        DatabasePort:
+          Fn::ImportValue:
+            !Sub "${EnvironmentStackSetName}-${Environment}-DatabasePort"
+        DBMasterUserName: !Ref DBMasterUserName
+        DBMasterPassword: !Ref DBMasterPassword
 
 
 Outputs:
