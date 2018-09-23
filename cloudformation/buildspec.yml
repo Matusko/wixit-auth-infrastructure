@@ -29,11 +29,11 @@ phases:
       for child_template in $CHILD_TEMPLATES; do
         aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/codebuild/$child_template"
       done
-
-    - CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
-    - echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN
-    - LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED=$(echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN | sed 's/\//\\\//g')
-    - echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED
+    - |
+      CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
+      echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN
+      LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED=$(echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN | sed 's/\//\\\//g')
+      echo $LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED
 
     - sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
     - sed -i -e "s/LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_PLACEHOLDER/$LOAD_BALANCER_LISTENER_CERTIFICATE_ARN_ESCAPED/" cloudformation/stackset/microservice-params-template.json
