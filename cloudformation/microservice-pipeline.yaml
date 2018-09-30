@@ -15,8 +15,6 @@ Parameters:
     Type: String
   ContextPath:
     Type: String
-  LoadBalancerListenerCertificateArn:
-    Type: String
   EnvironmentStackSetName:
     Type: String
   ConfigLocation:
@@ -439,9 +437,6 @@ Resources:
           - Name: CONTEXT_PATH
             Value:
               Ref: ContextPath
-          - Name: LOAD_BALANCER_LISTENER_CERTIFICATE_ARN
-            Value:
-              Ref: LoadBalancerListenerCertificateArn
           - Name: ENVIRONMENT_STACK_SET_NAME
             Value:
               Ref: EnvironmentStackSetName

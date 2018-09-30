@@ -20,10 +20,6 @@ Parameters:
     Default: /auth
     Description: url path prefix for all microservice calls
 
-  LoadBalancerListenerCertificateArn:
-    Type: String
-    Description: SSl certificate arn for load balancer listene
-
   DBMasterUserName:
     Type: String
 
@@ -47,7 +43,7 @@ Resources:
           Fn::ImportValue:
             !Sub "${EnvironmentStackSetName}-${Environment}-VpcId"
 
-  LoadBalancerListener:
+  LoadBalancerListenerRule:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener.yaml"
@@ -55,10 +51,9 @@ Resources:
         VpcId:
           Fn::ImportValue:
             !Sub "${EnvironmentStackSetName}-${Environment}-VpcId"
-        LoadBalancerArn:
+        LoadBalancerListenerArn:
           Fn::ImportValue:
-            !Sub "${EnvironmentStackSetName}-${Environment}-LoadBalancerArn"
-        LoadBalancerListenerCertificateArn: !Ref LoadBalancerListenerCertificateArn
+            !Sub "${EnvironmentStackSetName}-${Environment}-LoadBalancerListenerArn"
         ContextPath: !Ref ContextPath
 
   Service:
@@ -67,7 +62,7 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/service.yaml"
       Parameters:
         Cluster: !GetAtt Cluster.Outputs.ClusterName
-        TargetGroup: !GetAtt LoadBalancerListener.Outputs.TargetGroup
+        TargetGroup: !GetAtt LoadBalancerListenerRule.Outputs.TargetGroup
         SourceSecurityGroup:
           Fn::ImportValue:
             !Sub "${EnvironmentStackSetName}-${Environment}-LoadBalancerSourceSecurityGroup"
