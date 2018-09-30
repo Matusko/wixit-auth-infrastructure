@@ -3,12 +3,12 @@ environment_variables:
   plaintext:
     CHILD_TEMPLATES: |
       cloudformation/stackset/microservice-templates/ecs-cluster.yaml
-      cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
+      cloudformation/stackset/microservice-templates/load-balancer-listener-rule.yaml
       cloudformation/stackset/microservice-templates/service.yaml
     TEMPLATE_FILES: |
       cloudformation/stackset/microservice.yaml
       cloudformation/stackset/microservice-templates/ecs-cluster.yaml
-      cloudformation/stackset/microservice-templates/load-balancer-listener.yaml
+      cloudformation/stackset/microservice-templates/load-balancer-listener-rule.yaml
       cloudformation/stackset/microservice-templates/service.yaml
 phases:
   install:

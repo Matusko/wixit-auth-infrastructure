@@ -46,7 +46,7 @@ Resources:
   LoadBalancerListenerRule:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener.yaml"
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplateBucket}/cloudformation/stackset/microservice-templates/load-balancer-listener-rule.yaml"
       Parameters:
         VpcId:
           Fn::ImportValue:
