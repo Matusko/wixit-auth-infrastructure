@@ -12,6 +12,9 @@ Parameters:
   LoadBalancerListenerArn:
     Type: String
 
+  LoadBalancerListenerRulePriority:
+    Type: Number
+
 
 Resources:
   TargetGroup:
@@ -36,7 +39,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn: !Ref LoadBalancerListenerArn
-      Priority: 1
+      Priority: !Ref LoadBalancerListenerRulePriority
       Conditions:
         - Field: path-pattern
           Values:
