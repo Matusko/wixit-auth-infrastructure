@@ -32,9 +32,11 @@ phases:
       done
     - |
       CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
-      TIMESTAMP=$(date +%s)
+      CUSTOM_RAND_VAR=$(shuf -i 1-50000 -n 1)
+      echo $CUSTOM_RAND_VAR
+
       sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
-      sed -i -e "s/LOAD_BALANCER_LISTENER_RULE_PRIORITY/$TIMESTAMP/" cloudformation/stackset/microservice-params-template.json
+      sed -i -e "s/LOAD_BALANCER_LISTENER_RULE_PRIORITY_PLACEHOLDER/$CUSTOM_RAND_VAR/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/ENVIRONMENT_STACK_SET_NAME_PLACEHOLDER/$ENVIRONMENT_STACK_SET_NAME/" cloudformation/stackset/microservice-params-template.json
 
