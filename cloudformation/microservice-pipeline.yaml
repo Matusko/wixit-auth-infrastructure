@@ -171,6 +171,7 @@ Resources:
                   - "elasticloadbalancing:CreateRule"
                   - "elasticloadbalancing:ModifyRule"
                   - "elasticloadbalancing:DeleteRule"
+                  - "elasticloadbalancing:SetRulePriorities"
                   - "autoscaling:CreateAutoScalingGroup"
                   - "autoscaling:DeleteAutoScalingGroup"
                   - "autoscaling:CreateLaunchConfiguration"
