@@ -22,8 +22,9 @@ Parameters:
     Default: wixit-core-configs
   StageLevel:
     Type: String
-    Default: dev
+    Default: test
     AllowedValues:
+    - test
     - dev
     - prod
 
