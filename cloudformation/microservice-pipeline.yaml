@@ -17,6 +17,7 @@ Parameters:
     Type: String
   EnvironmentStackSetName:
     Type: String
+    Default: wixit-core
   ConfigLocation:
     Type: String
     Default: wixit-core-configs
