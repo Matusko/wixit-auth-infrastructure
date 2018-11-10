@@ -11,7 +11,6 @@ with open(environment_stack_desc_json_file) as f:
     environment_stack_set_desc = json.load(f)
 
 environment_stack_set_outputs = environment_stack_set_desc['Stacks'][0]['Outputs']
-
 microsevice_input_params = environment_params
 
 exclude_params = ['ServiceUrl', 'DatabaseEndpoint', 'DatabasePort']
