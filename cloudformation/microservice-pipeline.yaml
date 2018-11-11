@@ -369,6 +369,11 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              - Effect: "Allow"
+                Action:
+                - "secretsmanager:GetSecretValue"
+                Resource:
+                - Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WixitProd*
               -
                 Effect: "Allow"
                 Action:
@@ -424,7 +429,7 @@ Resources:
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/nodejs:7.0.0
+        Image: aws/codebuild/nodejs:10.1.0
         EnvironmentVariables:
           - Name: TEMPLATE_BUCKET
             Value:
