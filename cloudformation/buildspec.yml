@@ -55,7 +55,7 @@ phases:
       echo $temp
       secret_string_json="${temp#\"}"
       echo $secret_string_json
-      password_str=$(echo $secret_string_json | sed 's/\\n/\n/g | jq .PostgreDbPassword)
+      password_str=$(echo $secret_string_json | sed 's/\\n/\n/g' | jq .PostgreDbPassword)
       echo $password_str
       DATABASE_MASTER_PASSWORD=${password_str:1:${#password_str}-2}
 
