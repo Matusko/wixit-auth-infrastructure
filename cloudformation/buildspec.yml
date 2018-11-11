@@ -50,15 +50,15 @@ phases:
 
       echo WTFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       secret_string_escaped_json=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd | jq '.SecretString')
-      echo secret_string_escaped_json
+      echo $secret_string_escaped_json
       temp="${secret_string_escaped_json%\"}"
-      echo temp
+      echo $temp
       secret_string_json="${temp#\"}"
-      echo secret_string_json
+      echo $secret_string_json
       secret_string_json_unescaped=$(printf $secret_string_json)
-      echo secret_string_json_unescaped
+      echo $secret_string_json_unescaped
       password_str=$(echo $secret_string_json_unescaped | jq .PostgreDbPassword)
-      echo password_str
+      echo $password_str
       DATABASE_MASTER_PASSWORD=${password_str:1:${#password_str}-2}
 
       echo $DATABASE_MASTER_PASSWORD
