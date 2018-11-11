@@ -49,6 +49,7 @@ phases:
       done
       sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
 
+      aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd
       secret_string_escaped_json=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd | jq '.SecretString')
       secret_string_json=$(printf "${secret_string_escaped_json:1:${#secret_string_escaped_json}-2}\n")
       password_str=$(echo $secret_string_json | jq .PostgreDbPassword)
