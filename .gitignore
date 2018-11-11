@@ -2,4 +2,3 @@
 target/
 cloudformation/microservice-pipeline-params.json
 cloudformation/microservice-pipeline-params-without-variables.json
-cloudformation/config

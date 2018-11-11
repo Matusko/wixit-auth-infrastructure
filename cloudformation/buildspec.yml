@@ -42,13 +42,19 @@ phases:
 
       echo "PROD CONFIGS"
       cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-prod.json
-      aws s3 cp s3://$CONFIG_BUCKET/auth/prod/config.json .
-      values=`cat config.json`
+
+      values=`cat cloudformation/config/prod/config.json`
       for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
         export $s
       done
       sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
+
+      secret_string_escaped_json=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd | jq '.SecretString')
+      secret_string_json=$(printf "${secret_string_escaped_json:1:${#secret_string_escaped_json}-2}\n")
+      password_str=$(echo $secret_string_json | jq .PostgreDbPassword)
+      DATABASE_MASTER_PASSWORD=${password_str:1:${#password_str}-2}
       sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD/" cloudformation/stackset/microservice-params-prod.json
+
       sed -i -e "s/ENVIRONMENT_PLACEHOLDER/PROD/" cloudformation/stackset/microservice-params-prod.json
 
     - |
