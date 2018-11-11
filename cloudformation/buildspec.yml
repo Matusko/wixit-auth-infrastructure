@@ -56,11 +56,12 @@ phases:
       secret_string_json="${temp#\"}"
       echo $secret_string_json
       echo $secret_string_json | sed 's/\\//g'
-      printf '%b\n' "$secret_string_json"
       python --version
       password_str=$(echo $secret_string_json | sed 's/\\//g' | jq .PostgreDbPassword)
       echo $password_str
-      DATABASE_MASTER_PASSWORD=${password_str:1:${#password_str}-2}
+      temp="${password_str%\"}"
+      echo $temp
+      DATABASE_MASTER_PASSWORD="${temp#\"}"
 
       echo $DATABASE_MASTER_PASSWORD
 
