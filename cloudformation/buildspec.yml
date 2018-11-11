@@ -33,7 +33,6 @@ phases:
     - |
       CONTEXT_PATH_ESCAPED=$(echo $CONTEXT_PATH | sed 's/\//\\\//g')
       CUSTOM_RAND_VAR=$(shuf -i 1-50000 -n 1)
-      echo $CUSTOM_RAND_VAR
 
       sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/LOAD_BALANCER_LISTENER_RULE_PRIORITY_PLACEHOLDER/$CUSTOM_RAND_VAR/" cloudformation/stackset/microservice-params-template.json
@@ -49,12 +48,15 @@ phases:
       done
       sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
 
-      aws --version
-      aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd
+      echo WTFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       secret_string_escaped_json=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd | jq '.SecretString')
+      echo $secret_string_escaped_json
       secret_string_json=$(printf "${secret_string_escaped_json:1:${#secret_string_escaped_json}-2}\n")
+      echo secret_string_json
       password_str=$(echo $secret_string_json | jq .PostgreDbPassword)
+      echo password_str
       DATABASE_MASTER_PASSWORD=${password_str:1:${#password_str}-2}
+      echo DATABASE_MASTER_PASSWORD
       sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD/" cloudformation/stackset/microservice-params-prod.json
 
       sed -i -e "s/ENVIRONMENT_PLACEHOLDER/PROD/" cloudformation/stackset/microservice-params-prod.json
