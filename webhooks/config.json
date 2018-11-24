@@ -1,0 +1,5 @@
+{
+  "params": "cloudformation/params-template.json",
+  "template": "cloudformation/microservice-pipeline.yaml",
+  "infrastructure": ""
+}
