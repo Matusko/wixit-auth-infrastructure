@@ -12,8 +12,7 @@ Parameters:
   TemplateBucket:
     Type: String
     Default: ec2-spring-boot-cloudformation-stack
-    Description: >
-      The S3 bucket from which to fetch the templates used by this stack.
+    Description: The S3 bucket from which to fetch the templates used by this stack.
 
   ContextPath:
     Type: String
