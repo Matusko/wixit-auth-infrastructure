@@ -32,6 +32,16 @@ Parameters:
     Type: String
     NoEcho: true
 
+  RedisEndpoint:
+    Type: String
+
+  RedisPort:
+    Type: String
+
+  RedisPassword:
+    Type: String
+    NoEcho: true
+
   ContextPath:
     Type: String
 
@@ -90,6 +100,12 @@ Resources:
               Value: !Ref DBMasterUserName
             - Name: DB_MASTER_PSWD
               Value: !Ref DBMasterPassword
+            - Name: REDIS_ENDPOINT
+              Value: !Ref RedisEndpoint
+            - Name: REDIS_PORT
+              Value: !Ref RedisPort
+            - Name: REDIS_PSWD
+              Value: !Ref RedisPassword
             - Name: CONTEXT_PATH
               Value: !Ref ContextPath
           Memory: 256

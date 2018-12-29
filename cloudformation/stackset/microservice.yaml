@@ -26,6 +26,10 @@ Parameters:
     Type: String
     NoEcho: true
 
+  RedisPassword:
+    Type: String
+    NoEcho: true
+
   LoadBalancerListenerRulePriority:
     Type: Number
 
@@ -80,6 +84,13 @@ Resources:
             !Sub "${EnvironmentStackSetName}-${Environment}-DatabasePort"
         DBMasterUserName: !Ref DBMasterUserName
         DBMasterPassword: !Ref DBMasterPassword
+        RedisEndpoint:
+          Fn::ImportValue:
+            !Sub "${EnvironmentStackSetName}-${Environment}-RedisEndpoint"
+        RedisPort:
+          Fn::ImportValue:
+            !Sub "${EnvironmentStackSetName}-${Environment}-RedisPort"
+        RedisPassword: !Ref RedisPassword
         ContextPath: !Ref ContextPath
 
 
