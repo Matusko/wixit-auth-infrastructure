@@ -5,11 +5,11 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   InstanceType:
     Type: String
-    Default: t2.micro
+    Default: t2.small
 
   ClusterSize:
     Type: Number
-    Default: 2
+    Default: 1
 
   Subnets:
     Type: List<AWS::EC2::Subnet::Id>
