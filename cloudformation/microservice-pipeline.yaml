@@ -179,6 +179,7 @@ Resources:
                   - "autoscaling:DeleteAutoScalingGroup"
                   - "autoscaling:UpdateAutoScalingGroup"
                   - "autoscaling:TerminateInstanceInAutoScalingGroup"
+                  - "autoscaling:SetDesiredCapacity"
                   - "autoscaling:CreateLaunchConfiguration"
                   - "autoscaling:DeleteLaunchConfiguration"
                   - "rds:CreateDBSubnetGroup"
