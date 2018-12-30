@@ -146,6 +146,7 @@ Resources:
                 Action:
                   - "ec2:Describe*"
                   - "ec2:CreateSecurityGroup"
+                  - "ec2:RevokeSecurityGroupIngress"
                   - "ec2:CreateVpc"
                   - "ec2:DeleteVpc"
                   - "ec2:ModifyVpcAttribute"
