@@ -108,7 +108,7 @@ Resources:
               Value: !Ref RedisPassword
             - Name: CONTEXT_PATH
               Value: !Ref ContextPath
-          Memory: 256
+          Memory: 512
           PortMappings:
             - HostPort: 8080
               ContainerPort: 8080
