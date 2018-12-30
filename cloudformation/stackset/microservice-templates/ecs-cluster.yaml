@@ -20,6 +20,11 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
 
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: 'wixit-auth-dev'
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.
+
 
 Mappings:
   AWSRegionToAMI:
@@ -85,6 +90,15 @@ Resources:
           IpProtocol: -1
       VpcId: !Ref VpcId
 
+  SecurityGroupSSHinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'SecurityGroup'
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+
   Cluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -147,6 +161,7 @@ Resources:
       ImageId: !FindInMap [ AWSRegionToAMI, !Ref "AWS::Region", AMI ]
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref 'KeyName'
       SecurityGroups:
         - !Ref SecurityGroup
       UserData:
