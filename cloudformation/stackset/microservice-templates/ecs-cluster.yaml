@@ -5,7 +5,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   InstanceType:
     Type: String
-    Default: t2.small
+    Default: t2.micro
 
   ClusterSize:
     Type: Number
