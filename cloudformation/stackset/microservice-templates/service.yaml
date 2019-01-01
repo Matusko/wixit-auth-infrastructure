@@ -38,10 +38,6 @@ Parameters:
   RedisPort:
     Type: String
 
-  RedisPassword:
-    Type: String
-    NoEcho: true
-
   ContextPath:
     Type: String
 
@@ -104,10 +100,6 @@ Resources:
               Value: !Ref RedisEndpoint
             - Name: REDIS_PORT
               Value: !Ref RedisPort
-            - Name: REDIS_PSWD
-              Value: !Ref RedisPassword
-            - Name: REDIS_SSL_ENABLED
-              Value: true
             - Name: CONTEXT_PATH
               Value: !Ref ContextPath
           Memory: 512
