@@ -1,7 +1,6 @@
 {
   "Parameters" : {
-    "TemplateBucket": "feature_wxauth-1",
-    "Email": "bartko.mat@gmail.com",
+    "TemplateBucket": "TEMPLATE_BUCKET_PLACEHOLDER",
     "ContextPath": "CONTEXT_PATH_PLACEHOLDER",
     "Environment": "ENVIRONMENT_PLACEHOLDER",
     "EnvironmentStackSetName": "ENVIRONMENT_STACK_SET_NAME_PLACEHOLDER",

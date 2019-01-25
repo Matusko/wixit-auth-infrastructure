@@ -36,7 +36,7 @@ phases:
 
       sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/LOAD_BALANCER_LISTENER_RULE_PRIORITY_PLACEHOLDER/$CUSTOM_RAND_VAR/" cloudformation/stackset/microservice-params-template.json
-      sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
+      sed -i -e "s/TEMPLATE_BUCKET_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/ENVIRONMENT_STACK_SET_NAME_PLACEHOLDER/$ENVIRONMENT_STACK_SET_NAME/" cloudformation/stackset/microservice-params-template.json
 
       cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-dev.json
