@@ -556,6 +556,7 @@ Resources:
                   StackName:
                     Fn::Sub: ${AWS::StackName}-DEV
                 RunOrder: 2
+          - !Ref AWS::NoValue
         - !If
           - EnableProd
           - Name: Prod
@@ -611,6 +612,7 @@ Resources:
                   StackName:
                     Fn::Sub: ${AWS::StackName}-PROD
                 RunOrder: 3
+          - !Ref AWS::NoValue
 
       ArtifactStore:
         Type: S3
