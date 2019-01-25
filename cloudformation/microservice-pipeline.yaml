@@ -18,6 +18,8 @@ Parameters:
   EnvironmentStackSetName:
     Type: String
     Default: wixit-core
+  Email:
+    Type: String
   StageLevel:
     Type: String
     Default: test
@@ -25,6 +27,10 @@ Parameters:
     - test
     - dev
     - prod
+
+Conditions:
+  EnableProd: !Equals [!Ref StageLevel, prod]
+  EnableDev: !Or [!Equals [!Ref StageLevel, dev], Condition: EnableProd]
 
 Resources:
   CodePipelineRole:
@@ -91,6 +97,11 @@ Resources:
                   - "iam:PassRole"
                 Resource:
                   - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole-${AWS::StackName}
+              - Effect: "Allow"
+                Action:
+                  - 'sns:Publish'
+                Resource:
+                  - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::StackName}*
 
   CloudFormationRole:
     Type: "AWS::IAM::Role"
@@ -369,6 +380,7 @@ Resources:
                 Action:
                 - "secretsmanager:GetSecretValue"
                 Resource:
+                - Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WixitDev*
                 - Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WixitProd*
               -
                 Effect: "Allow"
@@ -446,6 +458,13 @@ Resources:
     Properties:
       BucketName: !Ref ArtifactStoreS3Location
 
+  DeployPipelineSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref Email
+          Protocol: email
+
   DeployPipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
@@ -492,50 +511,106 @@ Resources:
                 ProjectName:
                   Ref: BuildCopyCFNProject
               RunOrder: 1
-        -
-          Name: Production
-          Actions:
-            -
-              Name: CreateProdChangeSet
-              InputArtifacts:
-                -
-                  Name: CFNTemplateArtifact
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Version: 1
-                Provider: CloudFormation
-              OutputArtifacts:
-                -
-                  Name: CreatedProdChangeSet
-              Configuration:
-                ActionMode: CHANGE_SET_REPLACE
-                ChangeSetName: ProdCBChangeSet
-                RoleArn:
-                  Fn::GetAtt: [ CloudFormationRole, Arn ]
+        - !If
+          - EnableDev
+          - Name: Dev
+            Actions:
+              -
+                Name: CreateDevChangeSet
+                InputArtifacts:
+                  -
+                    Name: CFNTemplateArtifact
+                ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+                OutputArtifacts:
+                  -
+                    Name: CreatedDevChangeSet
+                Configuration:
+                  ActionMode: CHANGE_SET_REPLACE
+                  ChangeSetName: DevCBChangeSet
+                  RoleArn:
+                    Fn::GetAtt: [ CloudFormationRole, Arn ]
 
-                Capabilities: CAPABILITY_NAMED_IAM
-                StackName:
-                  Fn::Sub: ${AWS::StackName}-PROD
-                TemplateConfiguration: CFNTemplateArtifact::cloudformation/stackset/microservice-params-prod.json
-                TemplatePath: CFNTemplateArtifact::cloudformation/stackset/microservice.yaml
-              RunOrder: 1
-            -
-              Name: DeployProduction
-              InputArtifacts:
-                -
-                  Name: CreatedProdChangeSet
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Version: 1
-                Provider: CloudFormation
-              Configuration:
-                ActionMode: CHANGE_SET_EXECUTE
-                ChangeSetName: ProdCBChangeSet
-                StackName:
-                  Fn::Sub: ${AWS::StackName}-PROD
-              RunOrder: 2
+                  Capabilities: CAPABILITY_NAMED_IAM
+                  StackName:
+                    Fn::Sub: ${AWS::StackName}-DEV
+                  TemplateConfiguration: CFNTemplateArtifact::cloudformation/stackset/microservice-params-dev.json
+                  TemplatePath: CFNTemplateArtifact::cloudformation/stackset/microservice.yaml
+                RunOrder: 1
+              -
+                Name: DeployDev
+                InputArtifacts:
+                  -
+                    Name: CreatedDevChangeSet
+                ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+                Configuration:
+                  ActionMode: CHANGE_SET_EXECUTE
+                  ChangeSetName: DevCBChangeSet
+                  StackName:
+                    Fn::Sub: ${AWS::StackName}-DEV
+                RunOrder: 2
+        - !If
+          - EnableProd
+          - Name: Prod
+            Actions:
+              -
+                Name: CreateProdChangeSet
+                InputArtifacts:
+                  -
+                    Name: CFNTemplateArtifact
+                ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+                OutputArtifacts:
+                  -
+                    Name: CreatedProdChangeSet
+                Configuration:
+                  ActionMode: CHANGE_SET_REPLACE
+                  ChangeSetName: ProdCBChangeSet
+                  RoleArn:
+                    Fn::GetAtt: [ CloudFormationRole, Arn ]
+
+                  Capabilities: CAPABILITY_NAMED_IAM
+                  StackName:
+                    Fn::Sub: ${AWS::StackName}-PROD
+                  TemplateConfiguration: CFNTemplateArtifact::cloudformation/stackset/microservice-params-prod.json
+                  TemplatePath: CFNTemplateArtifact::cloudformation/stackset/microservice.yaml
+                RunOrder: 1
+              - Name: ApproveChangeSet
+                ActionTypeId:
+                  Category: Approval
+                  Owner: AWS
+                  Provider: Manual
+                  Version: 1
+                Configuration:
+                  NotificationArn: !Ref DeployPipelineSNSTopic
+                  CustomData: A new change set was created for the TestStack. Do you want to implement the changes?
+                RunOrder: 2
+              -
+                Name: DeployProd
+                InputArtifacts:
+                  -
+                    Name: CreatedProdChangeSet
+                ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+                Configuration:
+                  ActionMode: CHANGE_SET_EXECUTE
+                  ChangeSetName: ProdCBChangeSet
+                  StackName:
+                    Fn::Sub: ${AWS::StackName}-PROD
+                RunOrder: 3
 
       ArtifactStore:
         Type: S3
