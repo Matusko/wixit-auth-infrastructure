@@ -20,6 +20,10 @@
     "ParameterValue": "ARTIFACT_STORE"
   },
   {
+    "ParameterKey": "Email",
+    "ParameterValue": "bartko.mat@gmail.com"
+  },
+  {
     "ParameterKey": "ContextPath",
     "ParameterValue": "CONTEXT_PATH"
   },

@@ -36,11 +36,17 @@ phases:
 
       sed -i -e "s/CONTEXT_PATH_PLACEHOLDER/$CONTEXT_PATH_ESCAPED/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/LOAD_BALANCER_LISTENER_RULE_PRIORITY_PLACEHOLDER/$CUSTOM_RAND_VAR/" cloudformation/stackset/microservice-params-template.json
-      sed -i -e "s/TEMPLATE_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
+      sed -i -e "s/TEMPLATE_BUCKET_PLACEHOLDER/$TEMPLATE_BUCKET\/codebuild/" cloudformation/stackset/microservice-params-template.json
       sed -i -e "s/ENVIRONMENT_STACK_SET_NAME_PLACEHOLDER/$ENVIRONMENT_STACK_SET_NAME/" cloudformation/stackset/microservice-params-template.json
 
-      echo "PROD CONFIGS"
+      cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-dev.json
       cp cloudformation/stackset/microservice-params-template.json cloudformation/stackset/microservice-params-prod.json
+
+      values=`cat cloudformation/config/dev/config.json`
+      for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
+        export $s
+      done
+      sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-dev.json
 
       values=`cat cloudformation/config/prod/config.json`
       for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
@@ -48,22 +54,36 @@ phases:
       done
       sed -i -e "s/DATABASE_MASTER_USERNAME_PLACEHOLDER/$DATABASE_MASTER_USERNAME/" cloudformation/stackset/microservice-params-prod.json
 
-      secret_string_escaped_json=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd | jq '.SecretString')
-      temp="${secret_string_escaped_json%\"}"
-      secret_string_json="${temp#\"}"
+      secret_string_escaped_json_dev=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitDev | jq '.SecretString')
+      secret_string_escaped_json_prod=$(aws secretsmanager get-secret-value --region eu-west-1 --secret-id WixitProd | jq '.SecretString')
 
-      postgre_password_str=$(echo $secret_string_json | sed 's/\\//g' | jq .PostgreDbPassword)
-      postgre_password_str_temp="${postgre_password_str%\"}"
-      DATABASE_MASTER_PASSWORD="${postgre_password_str_temp#\"}"
+      temp_dev="${secret_string_escaped_json_dev%\"}"
+      temp_prod="${secret_string_escaped_json_prod%\"}"
 
-      sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD/" cloudformation/stackset/microservice-params-prod.json
+      secret_string_json_dev="${temp_dev#\"}"
+      secret_string_json_prod="${temp_prod#\"}"
 
+      postgre_password_str_dev=$(echo $secret_string_json_dev | sed 's/\\//g' | jq .PostgreDbPassword)
+      postgre_password_str_prod=$(echo $secret_string_json_prod | sed 's/\\//g' | jq .PostgreDbPassword)
+
+      postgre_password_str_temp_dev="${postgre_password_str_dev%\"}"
+      postgre_password_str_temp_prod="${postgre_password_str_prod%\"}"
+
+      DATABASE_MASTER_PASSWORD_DEV="${postgre_password_str_temp_dev#\"}"
+      DATABASE_MASTER_PASSWORD_PROD="${postgre_password_str_temp_prod#\"}"
+
+      sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD_DEV/" cloudformation/stackset/microservice-params-dev.json
+      sed -i -e "s/DATABASE_MASTER_PASSWORD_PLACEHOLDER/$DATABASE_MASTER_PASSWORD_PROD/" cloudformation/stackset/microservice-params-prod.json
+
+      sed -i -e "s/ENVIRONMENT_PLACEHOLDER/DEV/" cloudformation/stackset/microservice-params-dev.json
       sed -i -e "s/ENVIRONMENT_PLACEHOLDER/PROD/" cloudformation/stackset/microservice-params-prod.json
 
     - |
       aws s3 cp "cloudformation/stackset/microservice.yaml" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice.yaml"
+      aws s3 cp "cloudformation/stackset/microservice-params-dev.json" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice-params-dev.json"
       aws s3 cp "cloudformation/stackset/microservice-params-prod.json" "s3://$TEMPLATE_BUCKET/codebuild/stackset/microservice-params-prod.json"
 artifacts:
   files:
   - cloudformation/stackset/microservice.yaml
+  - cloudformation/stackset/microservice-params-dev.json
   - cloudformation/stackset/microservice-params-prod.json
